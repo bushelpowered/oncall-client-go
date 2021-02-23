@@ -38,12 +38,21 @@ func createDeleteTeam(oc *oncall.Client) error {
 		}
 		log.Info("Team was already created")
 	}
+
 	log.Infof("Created team: %+v", t)
 	roster, err := oc.CreateRoster(t.Name, t.Name)
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "HTTP Request failed (422)") {
 		return errors.Wrap(err, "Creating roster")
 	}
 	log.Infof("Created roster: %s/%s", t.Name, roster.Name)
+
+	err = oc.SetRosterUsers(t.Name, roster.Name, []string{"oisaac", "jbiel"})
+	if err != nil && !strings.Contains(err.Error(), "HTTP Request failed (422)") {
+		return errors.Wrap(err, "Setting roster users")
+	}
+	oc.SetRosterUsers(t.Name, roster.Name, []string{"oisaac"})
+	oc.SetRosterUsers(t.Name, roster.Name, []string{"jbiel"})
+
 	err = oc.DeleteRoster(t.Name, t.Name)
 	if err != nil {
 		return errors.Wrap(err, "Deleting roster")

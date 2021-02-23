@@ -108,7 +108,7 @@ func (c *Client) Request(method string, path string, body string, result interfa
 	}
 
 	if resp.StatusCode >= 400 {
-		log.Debugf("Dump of body on error: %s", string(bodyBytes))
+		log.Debugf("Dump of body on error (%d) (%s %s): %s", resp.StatusCode, req.Method, req.URL, string(bodyBytes))
 		return bodyBytes, fmt.Errorf("HTTP Request failed (%d)", resp.StatusCode)
 	}
 
