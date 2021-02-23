@@ -22,35 +22,7 @@ func (c *Client) SetRosterUsers(team, roster string, usernames []string) error {
 		return errors.Wrap(err, "Getting current list of roster users")
 	}
 
-	// Create two "sets", one of current users and one of target users
-	setCurrentUsers := map[string]bool{}
-	setTargetUsers := map[string]bool{}
-	for _, u := range usernames {
-		setTargetUsers[u] = true
-	}
-	for _, u := range currentUsers {
-		setCurrentUsers[u] = true
-	}
-
-	// If a user is in the list of current users but not in the list of target users
-	// then we ned to remove that user
-	usersToRemove := []string{}
-	for u, _ := range setCurrentUsers {
-		_, targetUser := setTargetUsers[u]
-		if !targetUser {
-			usersToRemove = append(usersToRemove, u)
-		}
-	}
-
-	// If a user is in the list of target users but not in the list of current users
-	// Then we need to add that user
-	usersToAdd := []string{}
-	for u, _ := range setTargetUsers {
-		_, targetUser := setCurrentUsers[u]
-		if !targetUser {
-			usersToAdd = append(usersToAdd, u)
-		}
-	}
+	usersToRemove, usersToAdd, _, _ := getSetVennDiagram(currentUsers, usernames)
 
 	for _, u := range usersToAdd {
 		err := c.AddRosterUser(team, roster, u)

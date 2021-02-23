@@ -21,13 +21,33 @@ func main() {
 		log.Fatal(errors.Wrap(err, "Failed to create oncall client"))
 	}
 
-	err = createDeleteTeam(oc)
+	err = createDeleteTeamAdmins(oc)
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func createDeleteTeam(oc *oncall.Client) error {
+func createDeleteTeamAdmins(oc *oncall.Client) error {
+	t, err := oc.CreateTeam(oncall.TeamConfig{
+		Name:               "go-client-test-team",
+		SchedulingTimezone: "US/Central",
+	})
+	if err != nil {
+		if !strings.Contains(err.Error(), "HTTP Request failed (422)") {
+			return errors.Wrap(err, "Creating team")
+		}
+		log.Info("Team was already created")
+	}
+
+	log.Infof("Created team: %+v", t)
+
+	err = oc.SetTeamAdmins(t.Name, []string{"oisaac"})
+
+	//err = oc.DeleteTeam(t.Name)
+	return errors.Wrap(err, "Deleting team "+t.Name)
+}
+
+func createDeleteTeamRoster(oc *oncall.Client) error {
 	t, err := oc.CreateTeam(oncall.TeamConfig{
 		Name:               "go-client-test-team",
 		SchedulingTimezone: "US/Central",
