@@ -18,6 +18,10 @@ func (c *Client) GetTeams() ([]string, error) {
 func (c *Client) GetTeam(name string) (Team, error) {
 	t := Team{}
 	_, err := c.Get("/api/v0/teams/"+name, &t)
+	for rosterName, roster := range t.Rosters {
+		roster.Name = rosterName
+		t.Rosters[rosterName] = roster
+	}
 	return t, errors.Wrapf(err, "Fetching team deatils for %s", name)
 }
 

@@ -42,6 +42,7 @@ type RosterUser struct {
 }
 
 type Roster struct {
+	Name      string       `json:"name"`
 	ID        int          `json:"id"`
 	Schedules []Schedule   `json:"schedules"`
 	Users     []RosterUser `json:"users"`
