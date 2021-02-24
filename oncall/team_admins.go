@@ -64,7 +64,7 @@ func (c *Client) RemoveTeamAdmin(team, username string) error {
 func loggerTeamAdmin(action, team, username string) *log.Entry {
 	logger := log.WithFields(log.Fields{
 		"action":   action,
-		"type":     "teamAdmin",
+		"type":     "team_admin",
 		"team":     team,
 		"username": username,
 	})
