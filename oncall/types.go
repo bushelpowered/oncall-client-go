@@ -22,23 +22,25 @@ type ScheduleEvent struct {
 	Start    int `json:"start"`
 }
 
+type ScheduleScheduler struct {
+	Name string `json:"name"`
+}
 type Schedule struct {
-	AdvancedMode          int             `json:"advanced_mode"`
-	AutoPopulateThreshold int             `json:"auto_populate_threshold"`
-	Events                []ScheduleEvent `json:"events"`
-	ID                    int             `json:"id"`
-	Role                  string          `json:"role"`
-	RoleID                int             `json:"role_id"`
-	Roster                string          `json:"roster"`
-	RosterID              int             `json:"roster_id"`
-	Team                  string          `json:"team"`
-	TeamID                int             `json:"team_id"`
-	Timezone              string          `json:"timezone"`
+	AdvancedMode          int               `json:"advanced_mode"`
+	AutoPopulateThreshold int               `json:"auto_populate_threshold"`
+	Scheduler             ScheduleScheduler `json:"scheduler"`
+	Events                []ScheduleEvent   `json:"events"`
+	ID                    int               `json:"id"`
+	Role                  string            `json:"role"`
+	Roster                string            `json:"roster"`
+	Team                  string            `json:"team"`
+	Timezone              string            `json:"timezone"`
 }
 
 type RosterUser struct {
-	InRotation bool   `json:"in_rotation"`
-	Name       string `json:"name"`
+	InRotationInt int    `json:"in_rotation"`
+	InRotation    bool   `json:"in_rotation"`
+	Name          string `json:"name"`
 }
 
 type Roster struct {

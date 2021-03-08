@@ -43,7 +43,8 @@ func (c *Client) SetRosterUsers(team, roster string, usernames []string) error {
 
 func (c *Client) AddRosterUser(team, roster, username string) error {
 	rosterUser := RosterUser{
-		Name: username,
+		Name:       username,
+		InRotation: true,
 	}
 
 	log.Tracef("Going to add %s to roster %s/%s", username, team, roster)

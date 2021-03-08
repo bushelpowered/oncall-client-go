@@ -27,11 +27,11 @@ type Config struct {
 	AuthMethod AuthMethod
 }
 
-type AuthMethod int
+type AuthMethod string
 
 const (
-	AuthMethodAPI AuthMethod = iota
-	AuthMethodUser
+	AuthMethodAPI  AuthMethod = "api"
+	AuthMethodUser            = "user"
 )
 
 type Client struct {
