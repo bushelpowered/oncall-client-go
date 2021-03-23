@@ -1,4 +1,4 @@
-module github.com/bushelpowered/oncall-client-go/oncall
+module github.com/bushelpowered/oncall-client-go
 
 go 1.15
 
