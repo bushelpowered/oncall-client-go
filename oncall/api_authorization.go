@@ -20,6 +20,11 @@ type APIAuthorizationRoundTripper struct {
 	PasswordGetter func() string
 }
 
+// API Auth logs in every time it runs
+func (art APIAuthorizationRoundTripper) Login() error {
+	return nil
+}
+
 func (art APIAuthorizationRoundTripper) RoundTrip(req *http.Request) (res *http.Response, e error) {
 	var err error
 

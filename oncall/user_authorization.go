@@ -50,6 +50,12 @@ func (uart UserAuthorizationRoundTripper) RoundTrip(req *http.Request) (res *htt
 	return uart.Proxied.RoundTrip(req)
 }
 
+// We don't actually login, just set the csrfToken to empty and it'll login again
+func (uart UserAuthorizationRoundTripper) Login() error {
+	*uart.csrfToken = ""
+	return nil
+}
+
 func (uart UserAuthorizationRoundTripper) GetCSRFToken() (string, error) {
 	var err error
 	if uart.csrfToken == nil {

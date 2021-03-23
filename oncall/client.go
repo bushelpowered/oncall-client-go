@@ -35,8 +35,14 @@ const (
 )
 
 type Client struct {
-	Client *http.Client
-	Config Config
+	Client           *http.Client
+	Config           Config
+	authRoundTripper AuthRoundtripper
+}
+
+type AuthRoundtripper interface {
+	Login() error
+	RoundTrip(req *http.Request) (res *http.Response, e error)
 }
 
 // New creates a new oncall client.
@@ -64,22 +70,21 @@ func New(client *http.Client, config Config) (*Client, error) {
 
 	if config.AuthMethod == AuthMethodUser {
 		log.Debug("Using User AuthMethod")
-		wrappedTransport := NewUserAuthorizationRoundTripper(UserAuthorizationRoundTripper{
+		oncallClient.authRoundTripper = NewUserAuthorizationRoundTripper(UserAuthorizationRoundTripper{
 			Proxied:        proxiedTransport,
 			UsernameGetter: func() string { return oncallClient.Config.Username },
 			PasswordGetter: func() string { return oncallClient.Config.Password },
 			LoginEndpoint:  strings.TrimRight(config.Endpoint, "/") + "/login",
 		})
-		client.Transport = wrappedTransport
 	} else {
 		log.Debug("Using API AuthMethod")
-		wrappedTransport := APIAuthorizationRoundTripper{
+		oncallClient.authRoundTripper = APIAuthorizationRoundTripper{
 			Proxied:        proxiedTransport,
 			UsernameGetter: func() string { return oncallClient.Config.Username },
 			PasswordGetter: func() string { return oncallClient.Config.Password },
 		}
-		client.Transport = wrappedTransport
 	}
+	client.Transport = oncallClient.authRoundTripper
 
 	oncallClient.Client = client
 
@@ -95,16 +100,38 @@ func (c *Client) Request(method string, path string, body string, result interfa
 		return []byte{}, errors.Wrap(err, "Failed to create new request")
 	}
 
-	log.Tracef("Going to do request: %s %s", req.Method, req.URL)
-	resp, err := c.Client.Do(req)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
+	var resp *http.Response
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	doRequest := func() (*http.Response, []byte, error) {
+		log.Tracef("Going to do request: %s %s", req.Method, req.URL)
+		resp, err = c.Client.Do(req)
+		if err != nil {
+			return resp, []byte{}, errors.Wrap(err, "Failed to do http request")
+		}
+		defer resp.Body.Close()
+
+		// read the body before checking status
+		// This way we can use the bodyBytes in the error message
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		return resp, bodyBytes, errors.Wrap(err, "Failed to read response body")
+	}
+
+	resp, bodyBytes, err := doRequest()
 	if err != nil {
-		return []byte{}, errors.Wrap(err, "Failed to read response body")
+		return bodyBytes, errors.Wrap(err, "Failed to do request")
+	}
+
+	if resp.StatusCode == 401 {
+		log.Debug("Going to re-login due to 401")
+		err := c.authRoundTripper.Login()
+		if err != nil {
+			return []byte{}, errors.Wrap(err, "Failed to login the auth roundtripper")
+		}
+	}
+
+	resp, bodyBytes, err = doRequest()
+	if err != nil {
+		return bodyBytes, errors.Wrap(err, "Failed to do request")
 	}
 
 	if resp.StatusCode >= 400 {
