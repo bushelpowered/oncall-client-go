@@ -50,7 +50,7 @@ func (c *Client) GetRosterSchedule(team, roster, scheduleRole string) (Schedule,
 			return sched, nil
 		}
 	}
-	return Schedule{}, errors.New("Did not find schedule")
+	return Schedule{}, errors.New("Did not find schedule (404)")
 }
 
 // UpdateRosterSchedule updates a roster scheudle for a team/roster pair.
