@@ -127,16 +127,16 @@ func (c *Client) Request(method string, path string, body string, result interfa
 		if err != nil {
 			return []byte{}, errors.Wrap(err, "Failed to login the auth roundtripper")
 		}
-	}
 
-	resp, bodyBytes, err = doRequest()
-	if err != nil {
-		return bodyBytes, errors.Wrap(err, "Failed to do request")
+		resp, bodyBytes, err = doRequest()
+		if err != nil {
+			return bodyBytes, errors.Wrap(err, "Failed to do request after re-login")
+		}
 	}
 
 	if resp.StatusCode >= 400 {
 		log.Debugf("Dump of body on error (%d) (%s %s): %s", resp.StatusCode, req.Method, req.URL, string(bodyBytes))
-		return bodyBytes, fmt.Errorf("HTTP Request failed (%d)", resp.StatusCode)
+		return bodyBytes, fmt.Errorf("HTTP Request failed (%d) (%s)", resp.StatusCode, string(bodyBytes))
 	}
 
 	if result != nil {
