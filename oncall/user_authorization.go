@@ -50,10 +50,11 @@ func (uart UserAuthorizationRoundTripper) RoundTrip(req *http.Request) (res *htt
 	return uart.Proxied.RoundTrip(req)
 }
 
-// We don't actually login, just set the csrfToken to empty and it'll login again
+// Login fetchs a new csrf token
 func (uart UserAuthorizationRoundTripper) Login() error {
 	*uart.csrfToken = ""
-	return nil
+	_, err := uart.GetCSRFToken()
+	return errors.Wrap(err, "Fetching csrf token for Login()")
 }
 
 func (uart UserAuthorizationRoundTripper) GetCSRFToken() (string, error) {
@@ -94,7 +95,7 @@ func (uart UserAuthorizationRoundTripper) GetCSRFToken() (string, error) {
 	}
 
 	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("Failed to login (%d)", resp.StatusCode)
+		return "", fmt.Errorf("Failed to login to %s (%d)", uart.LoginEndpoint, resp.StatusCode)
 	}
 
 	loginResponse := struct {
