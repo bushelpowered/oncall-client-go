@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // GetRosters returns a list of rosters by team
@@ -14,7 +13,7 @@ func (c *Client) GetRosters(team string) ([]string, error) {
 	url := fmt.Sprintf("/api/v0/teams/%s/rosters", team)
 	_, err := c.Get(url, &rosterList)
 	ret := []string{}
-	for r, _ := range rosterList {
+	for r := range rosterList {
 		ret = append(ret, r)
 	}
 	return ret, errors.Wrapf(err, "Fetching list of rosters for %s", team)

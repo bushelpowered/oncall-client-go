@@ -7,9 +7,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 type Config struct {
@@ -48,7 +48,11 @@ type AuthRoundtripper interface {
 // New creates a new oncall client.
 // client arg can be nil, which will default to http.DefaultClient
 // config should be populated with username, passsword, and endpoint
-func New(client *http.Client, config Config) (*Client, error) {
+func New(client *http.Client, config Config, logger LeveledLogger) (*Client, error) {
+	if logger != nil {
+		log = logger
+	}
+
 	if config.Endpoint == "" {
 		return nil, errors.New("You must define at least an endpoint")
 	}
@@ -123,7 +127,14 @@ func (c *Client) Request(method string, path string, body string, result interfa
 
 	if resp.StatusCode == 401 {
 		log.Debug("Going to re-login due to 401")
-		err := c.authRoundTripper.Login()
+		var err error
+		for i := 0; i < 3; i++ {
+			err = c.authRoundTripper.Login()
+			if err == nil {
+				break
+			}
+			time.Sleep(1 * time.Second)
+		}
 		if err != nil {
 			return []byte{}, errors.Wrap(err, "Failed to login the auth roundtripper")
 		}

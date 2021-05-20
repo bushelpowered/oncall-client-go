@@ -16,7 +16,7 @@ func main() {
 		Password:   os.Getenv("ONCALL_PASSWORD"),
 		Endpoint:   os.Getenv("ONCALL_ENDPOINT"),
 		AuthMethod: oncall.AuthMethodUser,
-	})
+	}, nil)
 	if err != nil {
 		log.Fatal(errors.Wrap(err, "Failed to create oncall client"))
 	}

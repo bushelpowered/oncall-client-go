@@ -9,7 +9,6 @@ import (
 	"net/url"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // This type implements the http.RoundTripper interface

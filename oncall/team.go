@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 func (c *Client) GetTeams() ([]string, error) {

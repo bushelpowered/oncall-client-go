@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // GetRosters returns a list of rosters by team
@@ -61,12 +60,11 @@ func (c *Client) RemoveTeamUser(team, username string) error {
 	return errors.Wrapf(err, "Removing user %s as user on %s", username, team)
 }
 
-func loggerTeamUser(action, team, username string) *log.Entry {
-	logger := log.WithFields(log.Fields{
-		"action":   action,
-		"type":     "team_user",
-		"team":     team,
-		"username": username,
-	})
+func loggerTeamUser(action, team, username string) LeveledLogger {
+	logger := log
+	logger = logger.WithField("action", action)
+	logger = logger.WithField("type", "team_user")
+	logger = logger.WithField("team", team)
+	logger = logger.WithField("username", username)
 	return logger
 }

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // GetRosterSchedules returrns a list of roster schedules with the key being the role and the value being the schedule
@@ -117,13 +116,11 @@ func (c *Client) RemoveRosterSchedule(team, roster, scheduleRole string) error {
 	return c.RemoveRosterScheduleByID(schedule.ID)
 }
 
-func loggerRosterSchedules(action, team, roster, schedule string) *log.Entry {
-	logger := log.WithFields(log.Fields{
-		"action":   action,
-		"type":     "roster_schedules",
-		"team":     team,
-		"roster":   roster,
-		"schedule": schedule,
-	})
+func loggerRosterSchedules(action, team, roster, schedule string) LeveledLogger {
+	logger := log.WithField("action", action)
+	logger = logger.WithField("type", "roster_schedules")
+	logger = logger.WithField("team", team)
+	logger = logger.WithField("roster", roster)
+	logger = logger.WithField("schedule", schedule)
 	return logger
 }
